@@ -1,8 +1,8 @@
 ---
 galaxy_info:
-  role_name: mcp_host
+  role_name: satellite_host
   author: Mitesh Sharma (mitsharm@redhat.com)
-  description: Create MCP host
+  description: Register and configure Satellite host
   license: GPLv3
   min_ansible_version: "2.9"
   platforms: []

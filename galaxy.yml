@@ -10,7 +10,10 @@ license:
 - GPL-2.0-or-later
 license_file: ''
 tags: []
-dependencies: {}
+dependencies:
+  containers.podman: '>=1.10.0'
+  community.general: '>=5.0.0'
+  ansible.posix: '>=1.4.0'
 repository: http://example.com/repository
 documentation: http://docs.example.com
 homepage: http://example.com

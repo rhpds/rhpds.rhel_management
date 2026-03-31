@@ -1,17 +1,19 @@
 ---
 - name: Install katello-ca-consumer RPM
-  ansible.builtin.shell: >-
-    dnf install {{ satellite_host_katello_ca_rpm }} -y
+  ansible.builtin.dnf:
+    name: "{{ satellite_host_katello_ca_rpm }}"
+    state: present
+    disable_gpg_check: true
 
 - name: Register Nodes to Satellite
-  ansible.builtin.shell: >-
-    subscription-manager register
-    --org "{{ satellite_host_org }}"
-    --activationkey "{{ satellite_host_activation_key }}"
+  community.general.redhat_subscription:
+    state: present
+    org_id: "{{ satellite_host_org }}"
+    activationkey: "{{ satellite_host_activation_key }}"
 
 - name: Install extra packages
   ansible.builtin.package:
-    name: "{{ satellite_host_extra_pacakges }}"
+    name: "{{ satellite_host_extra_packages }}"
     state: present
 
 - block:

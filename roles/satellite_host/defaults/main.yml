@@ -6,7 +6,7 @@ satellite_host_katello_ca_rpm: http://satellite-{{ subdomain }}/pub/katello-ca-c
 satellite_host_org: <CHANGEME>
 satellite_host_activation_key: <CHANGEME>
 
-satellite_host_extra_pacakges:
+satellite_host_extra_packages:
   - rhc-worker-playbook
   - yara
   - scap-security-guide-*

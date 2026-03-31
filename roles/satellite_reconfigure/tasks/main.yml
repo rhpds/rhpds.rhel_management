@@ -1,6 +1,6 @@
 ---
 - name: Edit /etc/hosts file
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/hosts
     regexp: '.*satellite.example.com'
     state: absent
@@ -130,8 +130,9 @@
     create: true
 
 - name: Set original gold image hostname via hostnamectl
-  ansible.builtin.command: >-
-    hostnamectl set-hostname {{ satellite_reconfigure_internal_fqdn }}
+  ansible.builtin.hostname:
+    name: "{{ satellite_reconfigure_internal_fqdn }}"
+    use: systemd
 
 - name: change satellite hostname
   ansible.builtin.shell: >-
@@ -141,13 +142,8 @@
   failed_when: '"Success!" not in satellite_change_hostname.stdout'
 
 - name: Disable SELinux
-  ansible.builtin.command: setenforce 0
-
-- name: Disable SELinux by updating config file
-  ansible.builtin.lineinfile:
-    path: /etc/selinux/config
-    regexp: '^SELINUX='
-    line: 'SELINUX=disabled'
+  ansible.posix.selinux:
+    state: disabled
 
 - name: Copy archive directory
   ansible.builtin.copy:

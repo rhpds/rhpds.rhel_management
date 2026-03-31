@@ -1,34 +1,53 @@
 ---
 
+- name: Download goose installer script
+  ansible.builtin.get_url:
+    url: https://github.com/block/goose/releases/download/stable/download_cli.sh
+    dest: /tmp/goose_install.sh
+    mode: '0755'
+
 - name: Install goose
   ansible.builtin.shell: >-
-    sudo curl -fsSL 
-    https://github.com/block/goose/releases/download/stable/download_cli.sh | CONFIGURE=false bash
-
+    CONFIGURE=false /tmp/goose_install.sh
+  environment:
+    CONFIGURE: "false"
 
 - name: Podman login to registry.redhat.io
-  ansible.builtin.command: >-
-    podman login registry -u {{ mcp_host_podman_username }}
-    -p {{ mcp_host_podman_password }} registry.redhat.io
+  containers.podman.podman_login:
+    username: "{{ mcp_host_podman_username }}"
+    password: "{{ mcp_host_podman_password }}"
+    registry: registry.redhat.io
 
 - name: Create cert directory
   ansible.builtin.file:
     path: /etc/pki/katello/certs
     state: directory
     recurse: true
+    mode: '0755'
 
 - name: Download CA cert
-  ansible.builtin.command: >-
-    curl {{ mcp_host_saatellite_ca_cert }}
-    > /etc/pki/katello/certs/foreman_raw_ca
+  ansible.builtin.get_url:
+    url: "{{ mcp_host_saatellite_ca_cert }}"
+    dest: /etc/pki/katello/certs/foreman_raw_ca
+    mode: '0644'
 
-- name: Run container
-  ansible.builtin.command: >-
-    podman run -d --publish 8080:8080
-    --volume /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
-    {{ mcp_host_server_image }}
-    --foreman-url https://satellite-b5fgl.apps.ocpvdev01.rhdp.net/
-    --no-verify-ssl
+- name: Run MCP server container
+  containers.podman.podman_container:
+    name: mcp-server
+    image: "{{ mcp_host_server_image }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "8080:8080"
+    volume:
+      - /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
+    command:
+      - "--foreman-url"
+      - "https://satellite-b5fgl.apps.ocpvdev01.rhdp.net/"
+      - "--no-verify-ssl"
 
-- name: Install pip library
-  ansible.builtin.command: pip install --user linux-mcp-server
+- name: Install linux-mcp-server pip library
+  ansible.builtin.pip:
+    name: linux-mcp-server
+    state: present
+    extra_args: --user
