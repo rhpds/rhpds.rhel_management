@@ -1,0 +1,14 @@
+---
+- name: Include register host tasks
+  ansible.builtin.include_tasks:
+    file: register-host.yml
+  # loop: "{{ lb1152_satellite_node_config_satellite_init_hosts }}"
+  # loop_control:
+  #   loop_var: _hostname_
+- name: Config host tasks
+  ansible.builtin.include_tasks:
+    file: config-host.yml
+  # loop: "{{ lb1152_satellite_node_config_satellite_init_hosts }}"
+  # loop_control:
+  #   loop_var: _hostname_
+

@@ -1,0 +1,18 @@
+namespace: rhpds
+
+name: rhel_management
+version: 1.0.0
+readme: README.md
+authors:
+- Mitesh Sharma <mitsharm@redhat.com>
+description: Manage RHEL nodes
+license:
+- GPL-2.0-or-later
+license_file: ''
+tags: []
+dependencies: {}
+repository: http://example.com/repository
+documentation: http://docs.example.com
+homepage: http://example.com
+issues: http://example.com/issue/tracker
+build_ignore: []

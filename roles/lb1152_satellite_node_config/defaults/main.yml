@@ -1,0 +1,21 @@
+---
+#----------------------------------------------------------------
+# List of Hosts
+#----------------------------------------------------------------
+#lb1152_satellite_node_config_satellite_init_hosts: "{{ groups['nodes'] }}"
+
+# -------------------------------------------------
+# Default Variables
+# -------------------------------------------------
+lb1152_subdomain_base: <CHANGEME>
+lb1152_satellite_node_config_internal: <CHANGEME>
+lb1152_satellite_node_config_user_name: admin
+lb1152_satellite_node_config_user_password: <CHANGEME>
+lb1152_satellite_node_config_org: <CHANGEME>
+lb1152_satellite_node_config_activation_key: <CHANGEME>
+
+#----------------------------------------------------------------
+# Inject Red Hat Insights registration tasks
+#----------------------------------------------------------------
+lb1152_satellite_node_config_insights_org: <CHANGEME>
+lb1152_satellite_node_config_insights_activation_key: <CHANGEME>

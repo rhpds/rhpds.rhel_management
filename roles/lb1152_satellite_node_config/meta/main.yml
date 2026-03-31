@@ -1,0 +1,11 @@
+---
+galaxy_info:
+  role_name: lb1152_satellite_node_config
+  author: Mitesh Sharma (mitsharm@redhat.com)
+  description: Configure satellite hosts
+  license: GPLv3
+  min_ansible_version: "2.9"
+  platforms: []
+  galaxy_tags:
+  - workshop
+dependencies: []
