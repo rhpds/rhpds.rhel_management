@@ -2,7 +2,7 @@
 # -------------------------------------------------
 # Default Variables
 # -------------------------------------------------
-satellite_reconfigure_external_fqdn: "{{ groups['satellites'][0].split('.')[0] }}-{{ subdomain }}"
-satellite_reconfigure_internal_fqdn: satellite.lab
-satellite_reconfigure_user_name: admin
-satellite_reconfigure_user_password: <CHANGEME>
+satellite_reconfigure_new_hostname: "{{ groups['satellites'][0].split('.')[0] }}-{{ subdomain }}"
+satellite_reconfigure_username: admin
+satellite_reconfigure_new_admin_password: "{{ common_password }}"
+satellite_reconfigure_org: "Acme Org"
