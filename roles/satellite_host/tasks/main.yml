@@ -5,11 +5,19 @@
     state: present
     disable_gpg_check: true
 
+- name: Update CA trust after installing katello CA
+  ansible.builtin.command: update-ca-trust
+  changed_when: false
+  when: satellite_host_verify_ssl | bool
+
 - name: Register Nodes to Satellite
-  community.general.redhat_subscription:
-    state: present
-    org_id: "{{ satellite_host_org }}"
-    activationkey: "{{ satellite_host_activation_key }}"
+  ansible.builtin.command: >-
+    subscription-manager register
+    --org="{{ satellite_host_org }}"
+    --activationkey="{{ satellite_host_activation_key }}"
+    {{ '--insecure' if not (satellite_host_verify_ssl | bool) else '' }}
+  args:
+    creates: /etc/pki/consumer/cert.pem
 
 - name: Install extra packages
   ansible.builtin.package:
