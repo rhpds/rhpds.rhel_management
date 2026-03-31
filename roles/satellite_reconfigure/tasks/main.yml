@@ -137,7 +137,7 @@
 - name: change satellite hostname
   ansible.builtin.shell: >-
     satellite-change-hostname {{ satellite_reconfigure_new_hostname }}
-    -u {{ satellite_reconfigure_username }} -p {{ satellite_reconfigure_new_admin_password }} --skip-dns --assumeyes
+    -u {{ satellite_reconfigure_username }} -p '{{ satellite_reconfigure_new_admin_password }}' --skip-dns --assumeyes
   register: satellite_change_hostname
   failed_when: '"Success!" not in satellite_change_hostname.stdout'
 
