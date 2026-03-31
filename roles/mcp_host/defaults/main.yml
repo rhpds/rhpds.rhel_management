@@ -3,8 +3,8 @@
 # -------------------------------------------------
 # Default Variables
 # -------------------------------------------------
-mcp_host_podman_username: "{{ redhat_registry_username }}"
-mcp_host_podman_password: "{{ redhat_registry_password }}"
+mcp_host_podman_username: "{{ registry_credentials_username }}"
+mcp_host_podman_password: "{{ registry_credentials_password }}"
 
 mcp_host_saatellite_url: >-
  https://satellite-{{ subdomain }}
