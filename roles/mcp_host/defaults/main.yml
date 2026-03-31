@@ -1,0 +1,15 @@
+---
+
+# -------------------------------------------------
+# Default Variables
+# -------------------------------------------------
+mcp_host_podman_username: "{{ redhat_registry_username }}"
+mcp_host_podman_password: "{{ redhat registry_password }}"
+
+mcp_host_saatellite_url: >-
+ https://satellite-{{ subdomain }}
+mcp_host_saatellite_ca_cert: >-
+  http://satellite-{{ subdomain }}/unattended/public/foreman_raw_ca
+
+mcp_host_server_image: >-
+ registry.redhat.io/satellite/foreman-mcp-server-rhel9@sha256:fd6b99a7c68025279ceeb0a27751039043706a0da2569e3b613752724bfc31a6

@@ -1,0 +1,21 @@
+---
+# -------------------------------------------------
+# Default Variables
+# -------------------------------------------------
+satellite_host_katello_ca_rpm: http://satellite-{{ subdomain }}/pub/katello-ca-consumer-latest.noarch.rpm
+satellite_host_org: <CHANGEME>
+satellite_host_activation_key: <CHANGEME>
+
+satellite_host_extra_pacakges:
+  - rhc-worker-playbook
+  - yara
+  - scap-security-guide-*
+  - postgresql-server
+  - rhc
+  - podman
+  - bzip2
+  - libxcb
+  - python3
+  - python3-pip
+  - zstd
+  - tmux

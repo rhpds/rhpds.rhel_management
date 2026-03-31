@@ -1,0 +1,34 @@
+---
+
+- name: Install goose
+  ansible.builtin.shell: >-
+    sudo curl -fsSL 
+    https://github.com/block/goose/releases/download/stable/download_cli.sh | CONFIGURE=false bash
+
+
+- name: Podman login to registry.redhat.io
+  ansible.builtin.command: >-
+    podman login registry -u {{ mcp_host_podman_username }}
+    -p {{ mcp_host_podman_password }} registry.redhat.io
+
+- name: Create cert directory
+  ansible.builtin.file:
+    path: /etc/pki/katello/certs
+    state: directory
+    recurse: true
+
+- name: Download CA cert
+  ansible.builtin.command: >-
+    curl {{ mcp_host_saatellite_ca_cert }}
+    > /etc/pki/katello/certs/foreman_raw_ca
+
+- name: Run container
+  ansible.builtin.command: >-
+    podman run -d --publish 8080:8080
+    --volume /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
+    {{ mcp_host_server_image }}
+    --foreman-url https://satellite-b5fgl.apps.ocpvdev01.rhdp.net/
+    --no-verify-ssl
+
+- name: Install pip library
+  ansible.builtin.command: pip install --user linux-mcp-server

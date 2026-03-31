@@ -1,0 +1,35 @@
+---
+- name: Install katello-ca-consumer RPM
+  ansible.builtin.shell: >-
+    dnf install {{ satellite_host_katello_ca_rpm }} -y
+
+- name: Register Nodes to Satellite
+  ansible.builtin.shell: >-
+    subscription-manager register
+    --org "{{ satellite_host_org }}"
+    --activationkey "{{ satellite_host_activation_key }}"
+
+- name: Install extra packages
+  ansible.builtin.package:
+    name: "{{ satellite_host_extra_pacakges }}"
+    state: present
+
+- block:
+    - name: Initialize the db
+      ansible.builtin.command: >-
+        /usr/bin/postgresql-setup --initdb
+
+  rescue:
+    - ansible.builtin.file: 
+        path: /var/lib/pgsql/data
+        state: absent
+
+    - name: Initialize the db
+      ansible.builtin.command: >-
+        /usr/bin/postgresql-setup --initdb
+
+- name: Enable and start the postgresql service
+  ansible.builtin.service:
+    name: postgresql
+    enabled: yes
+    state: started

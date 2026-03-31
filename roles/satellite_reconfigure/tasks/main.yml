@@ -6,13 +6,13 @@
     state: absent
   
 - name: Configure satellite admin password
-  ansible.builtin.command: "foreman-rake permissions:reset password={{ lb1152_satellite_reconfigure_user_password }}"
+  ansible.builtin.command: "foreman-rake permissions:reset password={{ satellite_reconfigure_user_password }}"
 
 - name: Update hammer admin password in /root/.hammer/cli.modules.d/foreman.yml
   ansible.builtin.lineinfile:
     path: /root/.hammer/cli.modules.d/foreman.yml
     regexp: 'password'
-    line: "  :password: '{{ lb1152_satellite_reconfigure_user_password }}'"
+    line: "  :password: '{{ satellite_reconfigure_user_password }}'"
 
 - name: Create letsencrypt subdirectories
   ansible.builtin.file:
@@ -53,7 +53,7 @@
             --rsa-key-size 4096 \
             --no-bootstrap \
             --standalone \
-            -d "{{ lb1152_satellite_reconfigure_external_fqdn }}" \
+            -d "{{ satellite_reconfigure_external_fqdn }}" \
             --email ansible-network@redhat.com \
             --noninteractive \
             --agree-tos
@@ -74,7 +74,7 @@
 - name: Download LetsEncrypt CA certs
   ansible.builtin.get_url:
     url: "{{ item.url }}"
-    dest: "/etc/letsencrypt/live/{{ lb1152_satellite_reconfigure_external_fqdn }}"
+    dest: "/etc/letsencrypt/live/{{ satellite_reconfigure_external_fqdn }}"
     mode: 0644
     checksum: "{{ item.checksum }}"
     group: root
@@ -89,17 +89,17 @@
 
 - name: Retrieve LetsEncrypt R10 cert
   ansible.builtin.slurp:
-    src: "/etc/letsencrypt/live/{{ lb1152_satellite_reconfigure_external_fqdn }}/r10.pem"
+    src: "/etc/letsencrypt/live/{{ satellite_reconfigure_external_fqdn }}/r10.pem"
   register: intermediate_cert_r10
 
 - name: Retrieve LetsEncrypt R11 cert
   ansible.builtin.slurp:
-    src: "/etc/letsencrypt/live/{{ lb1152_satellite_reconfigure_external_fqdn }}/r11.pem"
+    src: "/etc/letsencrypt/live/{{ satellite_reconfigure_external_fqdn }}/r11.pem"
   register: intermediate_cert_r11
 
 - name: Retrieve LetsEncrypt root X1 cert
   ansible.builtin.slurp:
-    src: "/etc/letsencrypt/live/{{ lb1152_satellite_reconfigure_external_fqdn }}/isrgrootx1.pem"
+    src: "/etc/letsencrypt/live/{{ satellite_reconfigure_external_fqdn }}/isrgrootx1.pem"
   register: root_cert
 
 - name: Combine R10, R11 and root X1 certs to create Letsencrypt CA bundle
@@ -108,7 +108,7 @@
       {{ root_cert.content|b64decode }}
       {{ intermediate_cert_r10.content | b64decode }}
       {{ intermediate_cert_r11.content | b64decode }}
-    dest: "/etc/letsencrypt/live/{{ lb1152_satellite_reconfigure_external_fqdn }}/letsencrypt-ca-bundle.pem"
+    dest: "/etc/letsencrypt/live/{{ satellite_reconfigure_external_fqdn }}/letsencrypt-ca-bundle.pem"
 
 - name: Start httpd
   ansible.builtin.service:
@@ -125,18 +125,18 @@
 - name: Add entry to /etc/hosts
   ansible.builtin.lineinfile:
     path: /etc/hosts
-    line: "{{ host_ip }} {{ lb1152_satellite_reconfigure_internal_fqdn }}"
+    line: "{{ host_ip }} {{ satellite_reconfigure_internal_fqdn }}"
     state: present
     create: true
 
 - name: Set original gold image hostname via hostnamectl
   ansible.builtin.command: >-
-    hostnamectl set-hostname {{ lb1152_satellite_reconfigure_internal_fqdn }}
+    hostnamectl set-hostname {{ satellite_reconfigure_internal_fqdn }}
 
 - name: change satellite hostname
   ansible.builtin.shell: >-
-    satellite-change-hostname {{ lb1152_satellite_reconfigure_external_fqdn }}
-    -u {{ lb1152_satellite_reconfigure_user_name }} -p {{ lb1152_satellite_reconfigure_user_password }} --skip-dns --assumeyes
+    satellite-change-hostname {{ satellite_reconfigure_external_fqdn }}
+    -u {{ satellite_reconfigure_user_name }} -p {{ satellite_reconfigure_user_password }} --skip-dns --assumeyes
   register: satellite_change_hostname
   failed_when: '"Success!" not in satellite_change_hostname.stdout'
 
@@ -168,9 +168,9 @@
 - name: Update satellite with LetsEncrypt cert and enable registration and template modules
   ansible.builtin.shell: >-
     satellite-installer --scenario satellite
-    --certs-server-cert "/etc/letsencrypt/live/{{ lb1152_satellite_reconfigure_external_fqdn }}/fullchain.pem"
-    --certs-server-key "/etc/letsencrypt/live/{{ lb1152_satellite_reconfigure_external_fqdn }}/privkey.pem"
-    --certs-server-ca-cert "/etc/letsencrypt/live/{{ lb1152_satellite_reconfigure_external_fqdn }}/letsencrypt-ca-bundle.pem"
+    --certs-server-cert "/etc/letsencrypt/live/{{ satellite_reconfigure_external_fqdn }}/fullchain.pem"
+    --certs-server-key "/etc/letsencrypt/live/{{ satellite_reconfigure_external_fqdn }}/privkey.pem"
+    --certs-server-ca-cert "/etc/letsencrypt/live/{{ satellite_reconfigure_external_fqdn }}/letsencrypt-ca-bundle.pem"
     --certs-update-server --certs-update-server-ca
     --foreman-proxy-registration true
     --foreman-proxy-templates true
@@ -183,13 +183,13 @@
 - name: print satellite user.info
   agnosticd_user_info:
     msg: |
-      Satellite URL: https://{{ lb1152_satellite_reconfigure_external_fqdn }}
-      Satellite User: {{ lb1152_satellite_reconfigure_user_name }}
-      Satellite User Password: {{ lb1152_satellite_reconfigure_user_password }}
+      Satellite URL: https://{{ satellite_reconfigure_external_fqdn }}
+      Satellite User: {{ satellite_reconfigure_user_name }}
+      Satellite User Password: {{ satellite_reconfigure_user_password }}
 
 - name: Save user data
   agnosticd_user_info:
     data:
-      workshop_satellite_url: "https://{{ lb1152_satellite_reconfigure_external_fqdn }}"
-      workshop_satellite_user_name: "{{ lb1152_satellite_reconfigure_user_name }}"
-      workshop_satellite_user_password: "{{ lb1152_satellite_reconfigure_user_password }}"
+      workshop_satellite_url: "https://{{ satellite_reconfigure_external_fqdn }}"
+      workshop_satellite_user_name: "{{ satellite_reconfigure_user_name }}"
+      workshop_satellite_user_password: "{{ satellite_reconfigure_user_password }}"

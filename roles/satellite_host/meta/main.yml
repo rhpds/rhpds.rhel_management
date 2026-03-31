@@ -1,11 +1,10 @@
 ---
 galaxy_info:
-  role_name: lb1152_satellite_reconfigure
+  role_name: mcp_host
   author: Mitesh Sharma (mitsharm@redhat.com)
-  description: Re configure satellite
+  description: Create MCP host
   license: GPLv3
   min_ansible_version: "2.9"
   platforms: []
-  galaxy_tags:
-  - workshop
+  galaxy_tags: []
 dependencies: []

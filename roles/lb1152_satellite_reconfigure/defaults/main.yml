@@ -1,8 +1,0 @@
----
-# -------------------------------------------------
-# Default Variables
-# -------------------------------------------------
-lb1152_satellite_reconfigure_external_fqdn: "{{ groups['satellites'][0].split('.')[0] }}.{{ subdomain_base }}"
-lb1152_satellite_reconfigure_internal_fqdn: satellite.example.com
-lb1152_satellite_reconfigure_user_name: admin
-lb1152_satellite_reconfigure_user_password: <CHANGEME>
