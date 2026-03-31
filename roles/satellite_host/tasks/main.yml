@@ -5,6 +5,12 @@
     state: present
     disable_gpg_check: true
 
+- name: Replace Hostname in /etc/rhsm/rhsm.conf
+  replace:
+    path: /etc/rhsm/rhsm.conf
+    regexp: "^hostname = satellite\\.lab"
+    replace: "hostname = satellite"
+
 - name: Register Nodes to Satellite
   community.general.redhat_subscription:
     state: present
