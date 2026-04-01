@@ -23,27 +23,27 @@
     - registration_result.rc not in [0, 70]
     - "'system has been registered' not in registration_result.stdout"
 
-- name: Install extra packages
-  ansible.builtin.package:
-    name: "{{ satellite_host_extra_packages }}"
-    state: present
+# - name: Install extra packages
+#   ansible.builtin.package:
+#     name: "{{ satellite_host_extra_packages }}"
+#     state: present
 
-- block:
-    - name: Initialize the db
-      ansible.builtin.command: >-
-        /usr/bin/postgresql-setup --initdb
+# - block:
+#     - name: Initialize the db
+#       ansible.builtin.command: >-
+#         /usr/bin/postgresql-setup --initdb
 
-  rescue:
-    - ansible.builtin.file: 
-        path: /var/lib/pgsql/data
-        state: absent
+#   rescue:
+#     - ansible.builtin.file: 
+#         path: /var/lib/pgsql/data
+#         state: absent
 
-    - name: Initialize the db
-      ansible.builtin.command: >-
-        /usr/bin/postgresql-setup --initdb
+#     - name: Initialize the db
+#       ansible.builtin.command: >-
+#         /usr/bin/postgresql-setup --initdb
 
-- name: Enable and start the postgresql service
-  ansible.builtin.service:
-    name: postgresql
-    enabled: yes
-    state: started
+# - name: Enable and start the postgresql service
+#   ansible.builtin.service:
+#     name: postgresql
+#     enabled: yes
+#     state: started
