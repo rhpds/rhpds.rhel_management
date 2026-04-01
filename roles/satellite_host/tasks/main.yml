@@ -10,28 +10,18 @@
   changed_when: false
   when: satellite_host_verify_ssl | bool
 
-- name: Check if system is already registered
-  ansible.builtin.command: subscription-manager identity
-  register: rhsm_identity
-  failed_when: false
-  changed_when: false
-
-- name: Clean subscription-manager state if registered
-  ansible.builtin.command: subscription-manager clean
-  when: rhsm_identity.rc == 0
-  changed_when: true
-
 - name: Register Nodes to Satellite
   ansible.builtin.shell: >-
     subscription-manager register
     --org="{{ satellite_host_org }}"
     --activationkey="{{ satellite_host_activation_key }}"
     {{ '--insecure' if not (satellite_host_verify_ssl | bool) else '' }}
+    --force 2>&1
   register: registration_result
+  changed_when: "'system has been registered' in registration_result.stdout"
   failed_when:
-    - registration_result.rc != 0
+    - registration_result.rc not in [0, 70]
     - "'system has been registered' not in registration_result.stdout"
-    - "'system identity' not in registration_result.stdout"
 
 - name: Install extra packages
   ansible.builtin.package:
