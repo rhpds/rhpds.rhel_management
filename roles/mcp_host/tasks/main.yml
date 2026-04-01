@@ -18,6 +18,12 @@
     password: "{{ mcp_host_podman_password }}"
     registry: registry.redhat.io
 
+- name: Install linux-mcp-server pip library
+  ansible.builtin.pip:
+    name: linux-mcp-server
+    state: present
+    extra_args: --user
+
 - name: Create cert directory
   ansible.builtin.file:
     path: /etc/pki/katello/certs

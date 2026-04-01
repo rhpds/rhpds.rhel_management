@@ -1,4 +1,13 @@
 ---
+- name: Register Nodes to Satellite
+  ansible.builtin.shell: >-
+    subscription-manager unregister
+  ignore_errors: true
+
+- name: Remove katello-ca-consumer package
+  ansible.builtin.dnf:
+    name: katello-ca-consumer*
+    state: absent
 
 - name: Register node with Red Hat Insights
   ansible.builtin.command: >-

@@ -1,4 +1,14 @@
 ---
+- name: Register Nodes to Satellite
+  ansible.builtin.shell: >-
+    subscription-manager unregister
+  ignore_errors: true
+
+- name: Remove katello-ca-consumer package
+  ansible.builtin.dnf:
+    name: katello-ca-consumer*
+    state: absent
+
 - name: Install katello-ca-consumer RPM
   ansible.builtin.dnf:
     name: "{{ satellite_host_katello_ca_rpm }}"
@@ -16,34 +26,28 @@
     --org="{{ satellite_host_org }}"
     --activationkey="{{ satellite_host_activation_key }}"
     {{ '--insecure' if not (satellite_host_verify_ssl | bool) else '' }}
-    --force 2>&1
   register: registration_result
   changed_when: "'system has been registered' in registration_result.stdout"
   failed_when:
     - registration_result.rc not in [0, 70]
     - "'system has been registered' not in registration_result.stdout"
 
-# - name: Install extra packages
-#   ansible.builtin.package:
-#     name: "{{ satellite_host_extra_packages }}"
-#     state: present
+- block:
+    - name: Initialize the db
+      ansible.builtin.command: >-
+        /usr/bin/postgresql-setup --initdb
 
-# - block:
-#     - name: Initialize the db
-#       ansible.builtin.command: >-
-#         /usr/bin/postgresql-setup --initdb
+  rescue:
+    - ansible.builtin.file:
+        path: /var/lib/pgsql/data
+        state: absent
 
-#   rescue:
-#     - ansible.builtin.file: 
-#         path: /var/lib/pgsql/data
-#         state: absent
+    - name: Initialize the db
+      ansible.builtin.command: >-
+        /usr/bin/postgresql-setup --initdb
 
-#     - name: Initialize the db
-#       ansible.builtin.command: >-
-#         /usr/bin/postgresql-setup --initdb
-
-# - name: Enable and start the postgresql service
-#   ansible.builtin.service:
-#     name: postgresql
-#     enabled: yes
-#     state: started
+- name: Enable and start the postgresql service
+  ansible.builtin.service:
+    name: postgresql
+    enabled: yes
+    state: started
