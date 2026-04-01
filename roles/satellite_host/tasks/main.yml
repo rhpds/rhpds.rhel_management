@@ -16,10 +16,10 @@
   failed_when: false
   changed_when: false
 
-- name: Unregister if already registered
-  ansible.builtin.command: subscription-manager unregister
+- name: Clean subscription-manager state if registered
+  ansible.builtin.command: subscription-manager clean
   when: rhsm_identity.rc == 0
-  failed_when: false
+  changed_when: true
 
 - name: Register Nodes to Satellite
   ansible.builtin.shell: >-
@@ -27,11 +27,11 @@
     --org="{{ satellite_host_org }}"
     --activationkey="{{ satellite_host_activation_key }}"
     {{ '--insecure' if not (satellite_host_verify_ssl | bool) else '' }}
-    --force
   register: registration_result
   failed_when:
     - registration_result.rc != 0
     - "'system has been registered' not in registration_result.stdout"
+    - "'system identity' not in registration_result.stdout"
 
 - name: Install extra packages
   ansible.builtin.package:
