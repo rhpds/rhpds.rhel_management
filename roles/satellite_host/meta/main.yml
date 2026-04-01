@@ -5,6 +5,16 @@ galaxy_info:
   description: Register and configure Satellite host
   license: GPLv3
   min_ansible_version: "2.9"
-  platforms: []
-  galaxy_tags: []
+  platforms:
+    - name: EL
+      versions:
+        - 8
+        - 9
+  galaxy_tags:
+    - rhel
+    - satellite
+    - subscription
+    - management
+    - redhat
+    - postgresql
 dependencies: []

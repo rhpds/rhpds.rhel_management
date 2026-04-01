@@ -1,5 +1,5 @@
 ---
-- name: Register Nodes to Satellite
+- name: Unregister from subscription manager
   ansible.builtin.shell: >-
     subscription-manager unregister
   ignore_errors: true

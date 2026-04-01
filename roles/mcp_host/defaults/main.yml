@@ -6,9 +6,9 @@
 mcp_host_podman_username: "{{ registry_credentials_username }}"
 mcp_host_podman_password: "{{ registry_credentials_password }}"
 
-mcp_host_saatellite_url: >-
+mcp_host_satellite_url: >-
  https://satellite-{{ subdomain }}
-mcp_host_saatellite_ca_cert: >-
+mcp_host_satellite_ca_cert: >-
   http://satellite-{{ subdomain }}/unattended/public/foreman_raw_ca
 
 mcp_host_server_image: >-

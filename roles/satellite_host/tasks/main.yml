@@ -1,5 +1,5 @@
 ---
-- name: Register Nodes to Satellite
+- name: Unregister from subscription manager
   ansible.builtin.shell: >-
     subscription-manager unregister
   ignore_errors: true
@@ -32,22 +32,24 @@
     - registration_result.rc not in [0, 70]
     - "'system has been registered' not in registration_result.stdout"
 
-- block:
+- name: Initialize PostgreSQL database
+  block:
     - name: Initialize the db
       ansible.builtin.command: >-
         /usr/bin/postgresql-setup --initdb
 
   rescue:
-    - ansible.builtin.file:
+    - name: Remove existing PostgreSQL data directory
+      ansible.builtin.file:
         path: /var/lib/pgsql/data
         state: absent
 
-    - name: Initialize the db
+    - name: Retry PostgreSQL database initialization
       ansible.builtin.command: >-
         /usr/bin/postgresql-setup --initdb
 
 - name: Enable and start the postgresql service
   ansible.builtin.service:
     name: postgresql
-    enabled: yes
+    enabled: true
     state: started

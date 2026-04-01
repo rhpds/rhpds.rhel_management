@@ -33,7 +33,7 @@
 
 - name: Download CA cert
   ansible.builtin.get_url:
-    url: "{{ mcp_host_saatellite_ca_cert }}"
+    url: "{{ mcp_host_satellite_ca_cert }}"
     dest: /etc/pki/katello/certs/foreman_raw_ca
     mode: '0644'
 
@@ -49,11 +49,5 @@
       - /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
     command:
       - "--foreman-url"
-      - "https://satellite-b5fgl.apps.ocpvdev01.rhdp.net/"
+      - "{{ mcp_host_satellite_url }}"
       - "--no-verify-ssl"
-
-- name: Install linux-mcp-server pip library
-  ansible.builtin.pip:
-    name: linux-mcp-server
-    state: present
-    extra_args: --user
