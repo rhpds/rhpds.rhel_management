@@ -1,7 +1,13 @@
 ---
+# Fix for: "chmod: invalid mode: 'A+user:lab-user:rx:allow'" error
+# When becoming an unprivileged user, Ansible needs to write temp files
+# This setting allows world-readable temp files instead of using ACLs
 - name: Run as lab user
   become: true
   become_user: "{{ student_name }}"
+  vars:
+    ansible_common_remote_group: "{{ student_name }}"
+    allow_world_readable_tmpfiles: true
   tags:
     - mcp_host
     - mcp_host_config
@@ -120,39 +126,46 @@
         - mcp_host_configure
         - tmux
 
-    - name: Create cert directory
-      ansible.builtin.file:
-        path: /etc/pki/katello/certs
-        state: directory
-        recurse: true
-        mode: '0755'
-      become: true
-      tags:
-        - mcp_host_setup
-        - certificates
+# Tasks requiring root privileges - run outside the student_name block
+- name: Create cert directory
+  ansible.builtin.file:
+    path: /etc/pki/katello/certs
+    state: directory
+    recurse: true
+    mode: '0755'
+  become: true
+  tags:
+    - mcp_host_setup
+    - certificates
 
-    - name: Download CA cert
-      ansible.builtin.get_url:
-        url: "{{ mcp_host_satellite_ca_cert_url }}"
-        dest: /etc/pki/katello/certs/foreman_raw_ca
-        mode: '0644'
-        validate_certs: "{{ mcp_host_verify_ssl | default(true) }}"
-      become: true
-      tags:
-        - mcp_host_setup
-        - certificates
+- name: Download CA cert
+  ansible.builtin.get_url:
+    url: "{{ mcp_host_satellite_ca_cert_url }}"
+    dest: /etc/pki/katello/certs/foreman_raw_ca
+    mode: '0644'
+    validate_certs: "{{ mcp_host_verify_ssl | default(true) }}"
+  become: true
+  tags:
+    - mcp_host_setup
+    - certificates
 
-    - name: Run MCP server container
-      containers.podman.podman_container:
-        name: mcp-server
-        image: "{{ mcp_host_server_image }}"
-        state: started
-        restart_policy: always
-        ports:
-          - "8080:8080"
-        volume:
-          - /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
-        command: "{{ mcp_host_container_command }}"
-      tags:
-        - mcp_host_deploy
-        - container
+# Container must run as student_name for rootless podman
+- name: Run MCP server container
+  become: true
+  become_user: "{{ student_name }}"
+  vars:
+    ansible_common_remote_group: "{{ student_name }}"
+    allow_world_readable_tmpfiles: true
+  containers.podman.podman_container:
+    name: mcp-server
+    image: "{{ mcp_host_server_image }}"
+    state: started
+    restart_policy: always
+    ports:
+      - "8080:8080"
+    volume:
+      - /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
+    command: "{{ mcp_host_container_command }}"
+  tags:
+    - mcp_host_deploy
+    - container

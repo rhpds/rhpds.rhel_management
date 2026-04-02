@@ -3,6 +3,11 @@
 # -------------------------------------------------
 # Default Variables
 # -------------------------------------------------
+
+# Ansible become settings - fixes ACL errors when becoming unprivileged user
+# Set to true if you get: "chmod: invalid mode: 'A+user:lab-user:rx:allow'"
+mcp_host_allow_world_readable_tmpfiles: true
+
 mcp_host_podman_username: "{{ registry_credentials_username }}"
 mcp_host_podman_password: "{{ registry_credentials_password }}"
 
@@ -18,7 +23,7 @@ mcp_host_server_image: >-
 # This should be set by satellite_reconfigure role or passed as a variable
 mcp_host_satellite_admin_access_token: ""
 
-# SSL verification - default to true for security
+# SSL verification - set to false for lab environments with self-signed certs
 mcp_host_verify_ssl: false
 
 # Container command - conditionally includes --no-verify-ssl based on mcp_host_verify_ssl
