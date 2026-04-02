@@ -11,8 +11,6 @@
         path: "/home/{{ student_name }}/.config/containers"
         state: directory
         mode: '0755'
-        owner: "{{ student_name }}"
-        group: "{{ student_name }}"
       tags:
         - mcp_host_setup
         - podman
@@ -31,9 +29,7 @@
     - name: Change file permissions
       ansible.builtin.file:
         path: "/home/{{ student_name }}/.config/containers/auth.json"
-        mode: '0600'
-        owner: "{{ student_name }}"
-        group: "{{ student_name }}"
+        mode: '0644'
       tags:
         - mcp_host_setup
         - podman
@@ -75,8 +71,6 @@
         state: directory
         recurse: true
         mode: '0755'
-        owner: "{{ student_name }}"
-        group: "{{ student_name }}"
       tags:
         - mcp_host_configure
         - goose
@@ -86,8 +80,6 @@
         src: goose_config.j2
         dest: /home/{{ student_name }}/.config/goose/config.yaml
         mode: '0600'
-        owner: "{{ student_name }}"
-        group: "{{ student_name }}"
       no_log: true
       tags:
         - mcp_host_configure
@@ -98,8 +90,6 @@
         src: goose_secret.j2
         dest: /home/{{ student_name }}/.config/goose/secret.yaml
         mode: '0600'
-        owner: "{{ student_name }}"
-        group: "{{ student_name }}"
       no_log: true
       tags:
         - mcp_host_configure
@@ -126,8 +116,6 @@
         content: 'set -g mouse on'
         dest: /home/{{ student_name }}/.tmux.conf
         mode: '0644'
-        owner: "{{ student_name }}"
-        group: "{{ student_name }}"
       tags:
         - mcp_host_configure
         - tmux
