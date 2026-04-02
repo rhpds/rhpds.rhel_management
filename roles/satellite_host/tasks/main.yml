@@ -5,6 +5,7 @@
   register: unregister_result
   changed_when: unregister_result.rc == 0
   failed_when: false
+  ignore_errors: true
 
 - name: Remove katello-ca-consumer package
   ansible.builtin.dnf:
