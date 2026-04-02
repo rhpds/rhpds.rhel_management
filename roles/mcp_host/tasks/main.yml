@@ -1,53 +1,170 @@
 ---
+- name: Run as lab user
+  become: true
+  become_user: "{{ student_name }}"
+  tags:
+    - mcp_host
+    - mcp_host_config
+  block:
+    - name: Ensure user containers config directory exists
+      ansible.builtin.file:
+        path: "/home/{{ student_name }}/.config/containers"
+        state: directory
+        mode: '0755'
+        owner: "{{ student_name }}"
+        group: "{{ student_name }}"
+      tags:
+        - mcp_host_setup
+        - podman
 
-- name: Download goose installer script
-  ansible.builtin.get_url:
-    url: https://github.com/block/goose/releases/download/stable/download_cli.sh
-    dest: /tmp/goose_install.sh
-    mode: '0755'
+    - name: Podman login to registry.redhat.io
+      containers.podman.podman_login:
+        username: "{{ mcp_host_podman_username }}"
+        password: "{{ mcp_host_podman_password }}"
+        registry: registry.redhat.io
+        authfile: "/home/{{ student_name }}/.config/containers/auth.json"
+      no_log: true
+      tags:
+        - mcp_host_setup
+        - podman
 
-- name: Install goose
-  ansible.builtin.shell: >-
-    CONFIGURE=false /tmp/goose_install.sh
-  environment:
-    CONFIGURE: "false"
+    - name: Change file permissions
+      ansible.builtin.file:
+        path: "/home/{{ student_name }}/.config/containers/auth.json"
+        mode: '0600'
+        owner: "{{ student_name }}"
+        group: "{{ student_name }}"
+      tags:
+        - mcp_host_setup
+        - podman
 
-- name: Podman login to registry.redhat.io
-  containers.podman.podman_login:
-    username: "{{ mcp_host_podman_username }}"
-    password: "{{ mcp_host_podman_password }}"
-    registry: registry.redhat.io
+    - name: Check if goose is already installed
+      ansible.builtin.stat:
+        path: /home/{{ student_name }}/.local/bin/goose
+      register: goose_binary
+      tags:
+        - mcp_host_install
+        - goose
 
-- name: Install linux-mcp-server pip library
-  ansible.builtin.pip:
-    name: linux-mcp-server
-    state: present
-    extra_args: --user
+    - name: Download goose installer script
+      ansible.builtin.get_url:
+        url: https://github.com/block/goose/releases/download/stable/download_cli.sh
+        dest: /tmp/goose_install.sh
+        mode: '0755'
+        force: true
+      when: not goose_binary.stat.exists
+      tags:
+        - mcp_host_install
+        - goose
 
-- name: Create cert directory
-  ansible.builtin.file:
-    path: /etc/pki/katello/certs
-    state: directory
-    recurse: true
-    mode: '0755'
+    - name: Install goose
+      ansible.builtin.shell: >-
+        CONFIGURE=false /tmp/goose_install.sh
+      environment:
+        CONFIGURE: "false"
+      args:
+        creates: /home/{{ student_name }}/.local/bin/goose
+      when: not goose_binary.stat.exists
+      tags:
+        - mcp_host_install
+        - goose
 
-- name: Download CA cert
-  ansible.builtin.get_url:
-    url: "{{ mcp_host_satellite_ca_cert }}"
-    dest: /etc/pki/katello/certs/foreman_raw_ca
-    mode: '0644'
+    - name: Create goose config dir
+      ansible.builtin.file:
+        path: /home/{{ student_name }}/.config/goose
+        state: directory
+        recurse: true
+        mode: '0755'
+        owner: "{{ student_name }}"
+        group: "{{ student_name }}"
+      tags:
+        - mcp_host_configure
+        - goose
 
-- name: Run MCP server container
-  containers.podman.podman_container:
-    name: mcp-server
-    image: "{{ mcp_host_server_image }}"
-    state: started
-    restart_policy: always
-    ports:
-      - "8080:8080"
-    volume:
-      - /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
-    command:
-      - "--foreman-url"
-      - "{{ mcp_host_satellite_url }}"
-      - "--no-verify-ssl"
+    - name: Copy goose config template
+      ansible.builtin.template:
+        src: goose_config.j2
+        dest: /home/{{ student_name }}/.config/goose/config.yaml
+        mode: '0600'
+        owner: "{{ student_name }}"
+        group: "{{ student_name }}"
+      no_log: true
+      tags:
+        - mcp_host_configure
+        - goose
+
+    - name: Copy goose secret template
+      ansible.builtin.template:
+        src: goose_secret.j2
+        dest: /home/{{ student_name }}/.config/goose/secret.yaml
+        mode: '0600'
+        owner: "{{ student_name }}"
+        group: "{{ student_name }}"
+      no_log: true
+      tags:
+        - mcp_host_configure
+        - goose
+
+    - name: Install fastmcp==2.14.5 pip library
+      ansible.builtin.pip:
+        name: fastmcp==2.14.5
+        state: present
+      tags:
+        - mcp_host_install
+        - python
+
+    - name: Install linux-mcp-server pip library
+      ansible.builtin.pip:
+        name: linux-mcp-server
+        state: present
+      tags:
+        - mcp_host_install
+        - python
+
+    - name: Setup tmux.conf
+      ansible.builtin.copy:
+        content: 'set -g mouse on'
+        dest: /home/{{ student_name }}/.tmux.conf
+        mode: '0644'
+        owner: "{{ student_name }}"
+        group: "{{ student_name }}"
+      tags:
+        - mcp_host_configure
+        - tmux
+
+    - name: Create cert directory
+      ansible.builtin.file:
+        path: /etc/pki/katello/certs
+        state: directory
+        recurse: true
+        mode: '0755'
+      become: true
+      tags:
+        - mcp_host_setup
+        - certificates
+
+    - name: Download CA cert
+      ansible.builtin.get_url:
+        url: "{{ mcp_host_satellite_ca_cert_url }}"
+        dest: /etc/pki/katello/certs/foreman_raw_ca
+        mode: '0644'
+        validate_certs: "{{ mcp_host_verify_ssl | default(true) }}"
+      become: true
+      tags:
+        - mcp_host_setup
+        - certificates
+
+    - name: Run MCP server container
+      containers.podman.podman_container:
+        name: mcp-server
+        image: "{{ mcp_host_server_image }}"
+        state: started
+        restart_policy: always
+        ports:
+          - "8080:8080"
+        volume:
+          - /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
+        command: "{{ mcp_host_container_command }}"
+      tags:
+        - mcp_host_deploy
+        - container

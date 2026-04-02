@@ -6,3 +6,4 @@ satellite_reconfigure_new_hostname: "{{ groups['satellites'][0].split('.')[0] }}
 satellite_reconfigure_username: admin
 satellite_reconfigure_new_admin_password: "{{ common_password }}"
 satellite_reconfigure_org: "Acme Org"
+satellite_reconfigure_admin_access_token_name: "mcp server"

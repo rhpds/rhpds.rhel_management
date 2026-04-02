@@ -1,0 +1,76 @@
+# Ansible Collection gitignore
+
+# Build artifacts
+*.tar.gz
+*.zip
+rhpds-rhel_management-*.tar.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+
+# Testing
+.tox/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+molecule/*/files/
+molecule/*/.molecule/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Ansible
+*.retry
+.ansible/
+ansible.log
+
+# Secrets (never commit these!)
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*_rsa
+*_rsa.pub
+*.vault
+.vault_pass
+secrets.yml
+credentials.yml
+auth.json
+
+# Test outputs
+tests/output/
+test-results/
+
+# Local development
+local/
+scratch/
+tmp/
