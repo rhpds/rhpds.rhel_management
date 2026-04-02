@@ -2,9 +2,6 @@
 - name: Unregister from subscription manager
   ansible.builtin.shell: >-
     subscription-manager unregister
-  register: insights_unregister_result
-  changed_when: insights_unregister_result.rc == 0
-  failed_when: false
   ignore_errors: true
 
 - name: Remove katello-ca-consumer package
@@ -17,22 +14,12 @@
     rhc connect
     -o {{ insights_host_org }}
     -a {{ insights_host_activation_key }}
-  register: insights_register
-  changed_when: "'successfully connected' in insights_register.stdout or insights_register.rc == 0"
-  failed_when:
-    - insights_register.rc != 0
-    - "'already registered' not in insights_register.stderr"
-  no_log: true
 
 - name: Run insights-client to generate config files
   ansible.builtin.command: insights-client --collector malware-detection
-  register: insights_client_run
-  changed_when: insights_client_run.rc == 0
-  failed_when: false
 
 - name: Configure insight malware detection
   ansible.builtin.lineinfile:
     line: "test_scan: false"
-    regexp: "^test_scan:"
+    regexp: "^test_scan: true"
     path: /etc/insights-client/malware-detection-config.yml
-    create: false

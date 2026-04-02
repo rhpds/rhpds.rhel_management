@@ -2,9 +2,6 @@
 - name: Unregister from subscription manager
   ansible.builtin.shell: >-
     subscription-manager unregister
-  register: unregister_result
-  changed_when: unregister_result.rc == 0
-  failed_when: false
   ignore_errors: true
 
 - name: Remove katello-ca-consumer package
@@ -16,12 +13,10 @@
   ansible.builtin.dnf:
     name: "{{ satellite_host_katello_ca_rpm }}"
     state: present
-    disable_gpg_check: "{{ satellite_host_disable_gpg_check | default(false) }}"
+    disable_gpg_check: true
 
 - name: Update CA trust after installing katello CA
   ansible.builtin.command: update-ca-trust
-  changed_when: false
-  when: satellite_host_verify_ssl | bool
 
 - name: Register Nodes to Satellite
   ansible.builtin.shell: >-
@@ -40,36 +35,16 @@
     - name: Initialize the db
       ansible.builtin.command: >-
         /usr/bin/postgresql-setup --initdb
-      args:
-        creates: /var/lib/pgsql/data/PG_VERSION
-      register: postgres_init
-      changed_when: postgres_init.rc == 0
 
   rescue:
-    - name: Check if PostgreSQL data directory exists
-      ansible.builtin.stat:
-        path: /var/lib/pgsql/data
-      register: postgres_data_dir
-
-    - name: Backup existing PostgreSQL data directory
-      ansible.builtin.copy:
-        src: /var/lib/pgsql/data
-        dest: "/var/lib/pgsql/data.backup.{{ ansible_date_time.epoch }}"
-        remote_src: true
-        mode: preserve
-      when: postgres_data_dir.stat.exists
-
     - name: Remove existing PostgreSQL data directory
       ansible.builtin.file:
         path: /var/lib/pgsql/data
         state: absent
-      when: postgres_data_dir.stat.exists
 
     - name: Retry PostgreSQL database initialization
       ansible.builtin.command: >-
         /usr/bin/postgresql-setup --initdb
-      register: postgres_retry
-      changed_when: postgres_retry.rc == 0
 
 - name: Enable and start the postgresql service
   ansible.builtin.service:

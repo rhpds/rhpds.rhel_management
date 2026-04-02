@@ -21,28 +21,26 @@
   register: file_data
 
 - name: Change satellite hostname
-  ansible.builtin.shell: |
-    satellite-change-hostname {{ satellite_reconfigure_new_hostname }} \
-      -u {{ satellite_reconfigure_username }} \
-      -p '{{ satellite_reconfigure_new_admin_password }}' \
-      --skip-dns --assumeyes
+  ansible.builtin.shell: >-
+    satellite-change-hostname {{ satellite_reconfigure_new_hostname }}
+    -u {{ satellite_reconfigure_username }}
+    -p '{{ satellite_reconfigure_new_admin_password }}'
+    --skip-dns
+    --assumeyes
   register: satellite_change_hostname
-  no_log: true
   failed_when: '"Success!" not in satellite_change_hostname.stdout'
-  changed_when: '"Success!" in satellite_change_hostname.stdout'
 
 - name: Refresh the manifest
-  ansible.builtin.command: 'hammer subscription refresh-manifest --organization="{{ satellite_reconfigure_org }}"'
-  changed_when: true
-  register: manifest_refresh
+  ansible.builtin.command: >-
+    hammer subscription
+    refresh-manifest
+    --organization="{{ satellite_reconfigure_org }}"
 
 - name: Check if admin access token already exists
   ansible.builtin.command: >-
     hammer user access-token list
     --user=admin
   register: existing_tokens
-  changed_when: false
-  failed_when: false
 
 - name: Create satellite admin token
   ansible.builtin.command: >-
@@ -50,10 +48,6 @@
     --user=admin
     --name="{{ satellite_reconfigure_admin_access_token_name }}"
   register: r_satellite_reconfigure_access_token
-  changed_when: r_satellite_reconfigure_access_token.rc == 0
-  failed_when:
-    - r_satellite_reconfigure_access_token.rc != 0
-    - "'already exists' not in r_satellite_reconfigure_access_token.stderr"
   when: satellite_reconfigure_admin_access_token_name not in existing_tokens.stdout
 
 - name: Extract admin access token from output
