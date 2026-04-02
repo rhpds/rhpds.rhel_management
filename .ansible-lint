@@ -1,0 +1,52 @@
+---
+# .ansible-lint configuration for rhel_management collection
+
+profile: production
+
+exclude_paths:
+  - .git/
+  - .github/
+  - tests/output/
+  - molecule/
+  - .venv/
+
+# Enable checking of loop variable prefixes in roles
+loop_var_prefix: "{role}_"
+
+# Use stricter rule set
+use_default_rules: true
+
+# Skip specific rules if needed
+skip_list:
+  - role-name[path]  # Allow role names with underscores
+  - yaml[line-length]  # Allow longer lines for readability in some cases
+
+# Warn only for specific rules during migration
+warn_list:
+  - experimental  # Warn about experimental rules
+  - no-changed-when  # Already fixed, but warn if new tasks added
+  - command-instead-of-module  # Prefer modules over commands
+  - command-instead-of-shell  # Prefer commands over shell
+
+# Enforce best practices
+strict: false
+
+# Supported Ansible versions
+supported_ansible_also:
+  - "2.14"
+  - "2.15"
+  - "2.16"
+  - "2.17"
+
+# Mock modules and roles for linting
+mock_modules:
+  - containers.podman.podman_login
+  - containers.podman.podman_container
+
+mock_roles: []
+
+# Enable offline mode
+offline: false
+
+# Verbosity level
+verbosity: 1

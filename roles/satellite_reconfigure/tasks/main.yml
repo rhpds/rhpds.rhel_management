@@ -1,12 +1,19 @@
 ---
 - name: Configure satellite admin password
-  ansible.builtin.command: "foreman-rake permissions:reset password={{ satellite_reconfigure_new_admin_password }}"
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo "{{ satellite_reconfigure_new_admin_password }}" | foreman-rake permissions:reset password="$(cat)"
+  args:
+    executable: /bin/bash
+  no_log: true
+  changed_when: true
 
 - name: Update hammer admin password in /root/.hammer/cli.modules.d/foreman.yml
   ansible.builtin.lineinfile:
     path: /root/.hammer/cli.modules.d/foreman.yml
-    regexp: 'password'
+    regexp: '^\s*:password:'
     line: "  :password: '{{ satellite_reconfigure_new_admin_password }}'"
+  no_log: true
 
 - name: Check if fapolicyd rules file exists
   ansible.builtin.stat:
@@ -14,11 +21,45 @@
   register: file_data
 
 - name: Change satellite hostname
-  ansible.builtin.shell: >-
-    satellite-change-hostname {{ satellite_reconfigure_new_hostname }}
-    -u {{ satellite_reconfigure_username }} -p '{{ satellite_reconfigure_new_admin_password }}' --skip-dns --assumeyes
+  ansible.builtin.shell: |
+    satellite-change-hostname {{ satellite_reconfigure_new_hostname }} \
+      -u {{ satellite_reconfigure_username }} \
+      -p '{{ satellite_reconfigure_new_admin_password }}' \
+      --skip-dns --assumeyes
   register: satellite_change_hostname
+  no_log: true
   failed_when: '"Success!" not in satellite_change_hostname.stdout'
+  changed_when: '"Success!" in satellite_change_hostname.stdout'
 
 - name: Refresh the manifest
   ansible.builtin.command: 'hammer subscription refresh-manifest --organization="{{ satellite_reconfigure_org }}"'
+  changed_when: true
+  register: manifest_refresh
+
+- name: Check if admin access token already exists
+  ansible.builtin.command: >-
+    hammer user access-token list
+    --user=admin
+  register: existing_tokens
+  changed_when: false
+  failed_when: false
+
+- name: Create satellite admin token
+  ansible.builtin.command: >-
+    hammer user access-token create
+    --user=admin
+    --name="{{ satellite_reconfigure_admin_access_token_name }}"
+  register: r_satellite_reconfigure_access_token
+  changed_when: r_satellite_reconfigure_access_token.rc == 0
+  failed_when:
+    - r_satellite_reconfigure_access_token.rc != 0
+    - "'already exists' not in r_satellite_reconfigure_access_token.stderr"
+  when: satellite_reconfigure_admin_access_token_name not in existing_tokens.stdout
+
+- name: Extract admin access token from output
+  ansible.builtin.set_fact:
+    satellite_reconfigure_admin_access_token: "{{ r_satellite_reconfigure_access_token.stdout_lines[1] | trim }}"
+  when:
+    - r_satellite_reconfigure_access_token is defined
+    - r_satellite_reconfigure_access_token.stdout_lines is defined
+    - r_satellite_reconfigure_access_token.stdout_lines | length > 1

@@ -4,18 +4,39 @@ name: rhel_management
 version: 1.0.0
 readme: README.md
 authors:
-- Mitesh Sharma <mitsharm@redhat.com>
-description: Manage RHEL nodes
+  - Mitesh Sharma <mitsharm@redhat.com>
+
+description: Ansible collection for managing RHEL nodes with Satellite, Insights, and MCP integration
+
 license:
-- GPL-2.0-or-later
+  - GPL-2.0-or-later
+
 license_file: ''
-tags: []
+
+tags:
+  - rhel
+  - satellite
+  - insights
+  - mcp
+  - management
+  - redhat
+  - podman
+  - linux
+
 dependencies:
   containers.podman: '>=1.10.0'
   community.general: '>=5.0.0'
   ansible.posix: '>=1.4.0'
-repository: http://example.com/repository
-documentation: http://docs.example.com
-homepage: http://example.com
-issues: http://example.com/issue/tracker
-build_ignore: []
+
+repository: https://github.com/rhpds/rhel_management
+documentation: https://github.com/rhpds/rhel_management/blob/main/README.md
+homepage: https://github.com/rhpds/rhel_management
+issues: https://github.com/rhpds/rhel_management/issues
+
+build_ignore:
+  - .git
+  - .gitignore
+  - .ansible-lint
+  - molecule
+  - tests/output
+  - '*.tar.gz'

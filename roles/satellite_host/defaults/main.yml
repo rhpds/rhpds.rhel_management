@@ -2,7 +2,12 @@
 # -------------------------------------------------
 # Default Variables
 # -------------------------------------------------
-satellite_host_katello_ca_rpm: http://satellite-{{ subdomain }}/pub/katello-ca-consumer-latest.noarch.rpm
-satellite_host_org: <CHANGEME>
-satellite_host_activation_key: <CHANGEME>
+satellite_host_katello_ca_rpm: "http://satellite-{{ subdomain }}/pub/katello-ca-consumer-latest.noarch.rpm"
+
+# REQUIRED: Must be set by user or will fail
+satellite_host_org: "{{ satellite_org | mandatory }}"
+satellite_host_activation_key: "{{ satellite_activation_key | mandatory }}"
+
+# SSL/Security settings
 satellite_host_verify_ssl: true
+satellite_host_disable_gpg_check: false

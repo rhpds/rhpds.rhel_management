@@ -3,5 +3,6 @@
 # -------------------------------------------------
 # Default Variables
 # -------------------------------------------------
-insights_host_org: <CHANGEME>
-insights_host_activation_key: <CHANGEME>
+# REQUIRED: Must be set by user or will fail
+insights_host_org: "{{ insights_org | mandatory }}"
+insights_host_activation_key: "{{ insights_activation_key | mandatory }}"

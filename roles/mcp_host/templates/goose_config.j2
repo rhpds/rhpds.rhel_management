@@ -1,0 +1,55 @@
+extensions:
+  lightspeedmcp:
+    enabled: true
+    type: stdio
+    name: Lightspeed MCP
+    description: Lightspeed MCP
+    cmd: /usr/bin/podman
+    args:
+    - run
+    - --env
+    - LIGHTSPEED_CLIENT_ID
+    - --env
+    - LIGHTSPEED_CLIENT_SECRET
+    - --interactive
+    - --rm
+    - ghcr.io/redhatinsights/red-hat-lightspeed-mcp:latest
+    envs: {}
+    env_keys:
+    - LIGHTSPEED_CLIENT_ID
+    - LIGHTSPEED_CLIENT_SECRET
+    timeout: 300
+    bundled: null
+    available_tools: []
+  linux-mcp-server:
+    enabled: true
+    type: stdio
+    name: linux-mcp-server
+    description: Linux MCP Server
+    cmd: /home/lab-user/.local/bin/linux-mcp-server
+    args: []
+    envs:
+      LINUX_MCP_ALLOWED_LOG_PATHS: /var/log/messages,/var/log/lastlog
+    env_keys: []
+    timeout: 30
+    bundled: null
+    available_tools: []
+satellitemcp:
+    enabled: true
+    type: streamable_http
+    name: Satellite MCP
+    description: satellite
+    uri: http://0.0.0.0:8080/mcp/
+    envs: {}
+    env_keys: []
+    headers:
+      FOREMAN_TOKEN: [{{ mcp_host_satellite_admin_access_token }}]
+      FOREMAN_USERNAME: [admin]
+    timeout: 300
+    bundled: null
+    available_tools: []
+GOOSE_PROVIDER: litellm
+GOOSE_TELEMETRY_ENABLED: false
+GOOSE_MODEL: {{ litellm_available_models_list }}
+LITELLM_HOST: {{ litellm_api_endpoint }}
+LITELLM_BASE_PATH: v1/chat/completions
