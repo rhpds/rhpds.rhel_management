@@ -19,7 +19,7 @@ mcp_host_server_image: >-
 mcp_host_satellite_admin_access_token: ""
 
 # SSL verification - default to true for security
-mcp_host_verify_ssl: true
+mcp_host_verify_ssl: false
 
 # Container command - conditionally includes --no-verify-ssl based on mcp_host_verify_ssl
 mcp_host_container_command:
