@@ -1,19 +1,12 @@
 ---
 - name: Configure satellite admin password
-  ansible.builtin.shell: |
-    set -o pipefail
-    echo "{{ satellite_reconfigure_new_admin_password }}" | foreman-rake permissions:reset password="$(cat)"
-  args:
-    executable: /bin/bash
-  no_log: true
-  changed_when: true
+  ansible.builtin.command: "foreman-rake permissions:reset password={{ satellite_reconfigure_new_admin_password }}"
 
 - name: Update hammer admin password in /root/.hammer/cli.modules.d/foreman.yml
   ansible.builtin.lineinfile:
     path: /root/.hammer/cli.modules.d/foreman.yml
-    regexp: '^\s*:password:'
+    regexp: 'password'
     line: "  :password: '{{ satellite_reconfigure_new_admin_password }}'"
-  no_log: true
 
 - name: Check if fapolicyd rules file exists
   ansible.builtin.stat:
