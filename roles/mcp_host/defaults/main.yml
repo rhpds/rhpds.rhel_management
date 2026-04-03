@@ -31,3 +31,17 @@ mcp_host_container_command:
   - "--foreman-url"
   - "{{ mcp_host_satellite_url }}"
   - "{{ '--no-verify-ssl' if not (mcp_host_verify_ssl | bool) else '' }}"
+
+# LiteLLM varialbes
+mcp_host_litellm_api_endpoint: >-
+  "{{ lookup('agnosticd.core.agnosticd_user_info', 'litellm_api_endpoint') }}"
+mcp_host_litellm_api_base_url: >-
+  "{{ lookup('agnosticd.core.agnosticd_user_info', 'litellm_api_base_url') }}"
+mcp_host_litellm_available_models_list: >-
+  "{{ lookup('agnosticd.core.agnosticd_user_info', 'litellm_available_models_list') }}"
+mcp_host_litellm_virtual_key: >-
+  "{{ lookup('agnosticd.core.agnosticd_user_info', 'litellm_virtual_key') }}"
+
+# Lightspeed Keys
+mcp_host_lightspeed_client_secret: ''
+mcp_host_lightspeed_client_id: ''

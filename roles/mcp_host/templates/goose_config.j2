@@ -50,6 +50,6 @@ satellitemcp:
     available_tools: []
 GOOSE_PROVIDER: litellm
 GOOSE_TELEMETRY_ENABLED: false
-GOOSE_MODEL: {{ litellm_available_models_list }}
-LITELLM_HOST: {{ litellm_api_endpoint }}
+GOOSE_MODEL: {{ mcp_host_litellm_available_models_list }}
+LITELLM_HOST: {{ mcp_host_litellm_api_endpoint }}
 LITELLM_BASE_PATH: v1/chat/completions
