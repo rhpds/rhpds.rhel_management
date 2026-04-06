@@ -4,10 +4,6 @@
 # Default Variables
 # -------------------------------------------------
 
-# Ansible become settings - fixes ACL errors when becoming unprivileged user
-# Set to true if you get: "chmod: invalid mode: 'A+user:lab-user:rx:allow'"
-mcp_host_allow_world_readable_tmpfiles: true
-
 mcp_host_podman_username: "{{ registry_credentials_username }}"
 mcp_host_podman_password: "{{ registry_credentials_password }}"
 
@@ -15,7 +11,7 @@ mcp_host_satellite_url: "https://satellite-{{ subdomain }}"
 
 # Use HTTPS for CA cert download when verify_ssl is enabled
 mcp_host_satellite_ca_cert_url: >-
-  {{ 'https' if (mcp_host_verify_ssl | default(true)) else 'http' }}://satellite-{{ subdomain }}/unattended/public/foreman_raw_ca
+  https://satellite-{{ subdomain }}/unattended/public/foreman_raw_ca
 
 mcp_host_server_image: >-
  registry.redhat.io/satellite/foreman-mcp-server-rhel9@sha256:fd6b99a7c68025279ceeb0a27751039043706a0da2569e3b613752724bfc31a6

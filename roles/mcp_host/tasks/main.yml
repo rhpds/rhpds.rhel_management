@@ -103,6 +103,26 @@
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
 
+- name: Allow users to open ports 80 and up without sudo etc
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: 80
+    state: present
+    reload: true
+
+- name: "Enable linger for the showroom_user"
+  ansible.builtin.command: "loginctl enable-linger {{ student_name }}"
+  become: true
+  changed_when: true
+
+- name: Enable and start podman.socket for user via machinectl
+  ansible.builtin.command: "machinectl shell {{ student_name }}@.host /bin/systemctl --user enable --now podman.socket"
+  become: true
+  register: podman_socket_result
+  changed_when: "'enabled' in podman_socket_result.stdout or 'started' in podman_socket_result.stdout or podman_socket_result.rc == 0"
+  retries: 3
+  delay: 2
+
 # Container must run as student_name for rootless podman
 - name: Run MCP server container
   become: true
