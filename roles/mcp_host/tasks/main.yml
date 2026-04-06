@@ -103,6 +103,12 @@
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
 
+- name: Install packages
+  become: true
+  ansible.builtin.dnf:
+    name: systemd-container
+    state: present
+
 - name: Allow users to open ports 80 and up without sudo etc
   ansible.posix.sysctl:
     name: net.ipv4.ip_unprivileged_port_start
