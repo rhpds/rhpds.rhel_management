@@ -58,8 +58,8 @@
 
 - name: Copy goose secret template
   ansible.builtin.template:
-    src: goose_secret.j2
-    dest: /home/{{ student_name }}/.config/goose/secret.yaml
+    src: goose_secrets.j2
+    dest: /home/{{ student_name }}/.config/goose/secrets.yaml
     mode: '0644'
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
