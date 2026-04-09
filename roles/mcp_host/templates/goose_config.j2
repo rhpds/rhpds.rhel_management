@@ -21,15 +21,19 @@ extensions:
     timeout: 300
     bundled: null
     available_tools: []
-  linux-mcp-server:
+  rhel-mcp-server:
     enabled: true
     type: stdio
-    name: linux-mcp-server
-    description: Linux MCP Server
+    name: rhel-mcp-server
+    description: RHEL MCP Server developer preview
     cmd: /home/lab-user/.local/bin/linux-mcp-server
     args: []
     envs:
       LINUX_MCP_ALLOWED_LOG_PATHS: /var/log/messages,/var/log/lastlog
+      LINUX_MCP_TOOLSET: both
+      LINUX_MCP_GATEKEEPER_MODEL: {{ mcp_host_litellm_available_models_list }}
+      OPENAI_API_BASE: {{ mcp_host_litellm_api_endpoint }}
+      OPENAI_API_KEY: {{ mcp_host_litellm_virtual_key }}
     env_keys: []
     timeout: 30
     bundled: null

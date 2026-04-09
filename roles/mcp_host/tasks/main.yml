@@ -1,4 +1,10 @@
 ---
+- name: SSH to mcp target hosts
+  become: true
+  become_user: "{{ student_name }}"
+  ansible.builtin.shell: >-
+    ssh {{ item }} hostname
+  loop: "{{ mcp_host_ssh_target_hosts }}"
 
 - name: Ensure user containers config directory exists
   ansible.builtin.file:
@@ -72,13 +78,37 @@
     state: present
     extra_args: --user
 
-- name: Install linux-mcp-server pip library
+# - name: Install linux-mcp-server pip library
+#   become: true
+#   become_user: "{{ student_name }}"
+#   ansible.builtin.pip:
+#     name: linux-mcp-server
+#     state: present
+#     extra_args: --user
+
+- name: Install linux-mcp-server using npm
   become: true
   become_user: "{{ student_name }}"
-  ansible.builtin.pip:
-    name: linux-mcp-server
-    state: present
-    extra_args: --user
+  block:
+    - name: Clone repo
+      ansible.builtin.git:
+        repo: "https://github.com/rhel-lightspeed/linux-mcp-server"
+        dest: /opt/linux-mcp-server
+
+    - name: Install npm deps
+      ansible.builtin.command: npm install
+      args:
+        chdir: "/opt/linux-mcp-server/mcp-app"
+
+    - name: Build app
+      ansible.builtin.command: npm run build:prod
+      args:
+        chdir: "/opt/linux-mcp-server/mcp-app"
+
+    - name: Install python package
+      ansible.builtin.command: pip install --user .
+      args:
+        chdir: "/opt/linux-mcp-server"
 
 - name: Setup tmux.conf
   ansible.builtin.copy:

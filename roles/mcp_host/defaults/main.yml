@@ -3,6 +3,12 @@
 # -------------------------------------------------
 # Default Variables
 # -------------------------------------------------
+mcp_host_ssh_target_hosts:
+  - rhel-1-{{ guid }}
+  - rhel-2-{{ guid }}
+  - rhel-3-{{ guid }}
+  - rhel-4-{{ guid }}
+
 mcp_host_podman_username: "{{ registry_credentials_username }}"
 mcp_host_podman_password: "{{ registry_credentials_password }}"
 

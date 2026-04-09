@@ -23,3 +23,25 @@
     line: "test_scan: false"
     regexp: "^test_scan: true"
     path: /etc/insights-client/malware-detection-config.yml
+
+- name: Initialize PostgreSQL database
+  block:
+    - name: Initialize the db
+      ansible.builtin.command: >-
+        /usr/bin/postgresql-setup --initdb
+
+  rescue:
+    - name: Remove existing PostgreSQL data directory
+      ansible.builtin.file:
+        path: /var/lib/pgsql/data
+        state: absent
+
+    - name: Retry PostgreSQL database initialization
+      ansible.builtin.command: >-
+        /usr/bin/postgresql-setup --initdb
+
+- name: Enable and start the postgresql service
+  ansible.builtin.service:
+    name: postgresql
+    enabled: true
+    state: started
