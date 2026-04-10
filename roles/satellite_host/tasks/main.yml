@@ -9,6 +9,12 @@
     name: katello-ca-consumer*
     state: absent
 
+- name: Set network.fqdn in /etc/rhsm/facts/katello.facts
+  ansible.builtin.copy:
+    dest: /etc/rhsm/facts/katello.facts
+    content: '{"network.fqdn": {{ inventory_hostname }}}'
+    mode: ug=rw,o=r
+
 - name: Install katello-ca-consumer RPM
   ansible.builtin.dnf:
     name: "{{ satellite_host_katello_ca_rpm }}"

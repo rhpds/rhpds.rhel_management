@@ -31,7 +31,7 @@ extensions:
     envs:
       LINUX_MCP_ALLOWED_LOG_PATHS: /var/log/messages,/var/log/lastlog
       LINUX_MCP_TOOLSET: both
-      LINUX_MCP_GATEKEEPER_MODEL: {{ mcp_host_litellm_available_models_list }}
+      LINUX_MCP_GATEKEEPER_MODEL: openai/{{ mcp_host_litellm_available_models_list }}
       OPENAI_API_BASE: {{ mcp_host_litellm_api_endpoint }}
       OPENAI_API_KEY: {{ mcp_host_litellm_virtual_key }}
     env_keys: []

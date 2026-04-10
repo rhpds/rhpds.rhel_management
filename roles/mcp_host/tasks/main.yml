@@ -106,7 +106,7 @@
         chdir: "/tmp/linux-mcp-server/mcp-app"
 
     - name: Install python package
-      ansible.builtin.command: pip install --user .
+      ansible.builtin.command: pip install .
       args:
         chdir: "/tmp/linux-mcp-server"
 
