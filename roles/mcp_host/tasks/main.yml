@@ -5,8 +5,14 @@
   ansible.builtin.shell: >-
     ssh {{ item }} hostname
   loop: "{{ mcp_host_ssh_target_hosts }}"
+  failed_when: false
+  changed_when: false
+  tags:
+    - mcp_setup
+    - ssh_check
 
 - name: Ensure user containers config directory exists
+  become: true
   ansible.builtin.file:
     path: "/home/{{ student_name }}/.config/containers"
     state: directory
@@ -24,6 +30,7 @@
     authfile: "/home/{{ student_name }}/.config/containers/auth.json"
 
 - name: Change file permissions
+  become: true
   ansible.builtin.file:
     path: "/home/{{ student_name }}/.config/containers/auth.json"
     mode: '0644'
@@ -31,21 +38,28 @@
     group: "{{ student_name }}"
 
 - name: Download goose installer script
+  become: true
   ansible.builtin.get_url:
     url: https://github.com/block/goose/releases/download/stable/download_cli.sh
     dest: /tmp/goose_install.sh
     mode: '0755'
     force: true
+  retries: 3
+  delay: 5
 
 - name: Install goose
   become: true
   become_user: "{{ student_name }}"
   ansible.builtin.shell: >-
     CONFIGURE=false /tmp/goose_install.sh
+  args:
+    creates: "/home/{{ student_name }}/.local/bin/goose"
   environment:
     CONFIGURE: "false"
+  changed_when: true
 
 - name: Create goose config dir
+  become: true
   ansible.builtin.file:
     path: /home/{{ student_name }}/.config/goose
     state: directory
@@ -55,6 +69,7 @@
     group: "{{ student_name }}"
 
 - name: Copy goose config template
+  become: true
   ansible.builtin.template:
     src: goose_config.j2
     dest: /home/{{ student_name }}/.config/goose/config.yaml
@@ -63,6 +78,7 @@
     group: "{{ student_name }}"
 
 - name: Copy goose secret template
+  become: true
   ansible.builtin.template:
     src: goose_secrets.j2
     dest: /home/{{ student_name }}/.config/goose/secrets.yaml
@@ -94,26 +110,36 @@
       ansible.builtin.git:
         repo: "https://github.com/rhel-lightspeed/linux-mcp-server"
         dest: /tmp/linux-mcp-server
+        force: true
+        version: main
+      retries: 3
+      delay: 5
 
     - name: Install npm deps
       ansible.builtin.command: npm install
       args:
         chdir: "/tmp/linux-mcp-server/mcp-app"
+        creates: "/tmp/linux-mcp-server/mcp-app/node_modules"
+      changed_when: true
 
     - name: Build app
       ansible.builtin.command: npm run build:prod
       args:
         chdir: "/tmp/linux-mcp-server/mcp-app"
+        creates: "/tmp/linux-mcp-server/mcp-app/dist"
+      changed_when: true
 
     - name: Install python package
-      ansible.builtin.command: pip install --user .
+      ansible.builtin.command: pip3 install --user .
       args:
         chdir: "/tmp/linux-mcp-server"
+      changed_when: true
 
 - name: Fix fakeredis compatibility issues
   ansible.builtin.include_tasks: fix_fakeredis_compatibility.yml
 
 - name: Setup tmux.conf
+  become: true
   ansible.builtin.copy:
     content: |
       set -g mouse on
@@ -131,12 +157,12 @@
     mode: '0755'
 
 - name: Download CA cert
+  become: true
   ansible.builtin.get_url:
     url: "{{ mcp_host_satellite_ca_cert_url }}"
     dest: /etc/pki/katello/certs/foreman_raw_ca
     mode: '0644'
-    owner: "{{ student_name }}"
-    group: "{{ student_name }}"
+    validate_certs: "{{ mcp_host_verify_ssl }}"
 
 - name: Install packages
   become: true
@@ -178,3 +204,10 @@
     volume:
       - /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
     command: "{{ mcp_host_container_command }}"
+
+- name: Verify MCP host installation
+  ansible.builtin.include_tasks: verify_installation.yml
+  when: mcp_host_verify_installation | default(true)
+  tags:
+    - mcp_verify
+    - verify

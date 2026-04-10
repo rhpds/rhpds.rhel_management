@@ -42,3 +42,6 @@ mcp_host_litellm_virtual_key: ''
 # Lightspeed Keys
 mcp_host_lightspeed_client_secret: ''
 mcp_host_lightspeed_client_id: ''
+
+# Verification
+mcp_host_verify_installation: true  # Set to false to skip post-installation verification
