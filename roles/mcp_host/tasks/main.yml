@@ -106,13 +106,18 @@
         chdir: "/tmp/linux-mcp-server/mcp-app"
 
     - name: Install python package
-      ansible.builtin.command: pip install .
+      ansible.builtin.command: pip install --user .
       args:
         chdir: "/tmp/linux-mcp-server"
 
+- name: Fix fakeredis compatibility issues
+  ansible.builtin.include_tasks: fix_fakeredis_compatibility.yml
+
 - name: Setup tmux.conf
   ansible.builtin.copy:
-    content: 'set -g mouse on'
+    content: |
+      set -g mouse on
+      unbind -n MouseDown3Pane
     dest: /home/{{ student_name }}/.tmux.conf
     mode: '0644'
     owner: "{{ student_name }}"

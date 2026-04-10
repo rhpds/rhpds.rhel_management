@@ -53,10 +53,24 @@ mcp_host_server_image: "registry.redhat.io/satellite/foreman-mcp-server-rhel9@sh
 
 1. Download and install goose CLI tool
 2. Authenticate Podman to registry.redhat.io
-3. Install linux-mcp-server Python library
-4. Create certificate directory structure
-5. Download Satellite CA certificate
-6. Deploy and start MCP server container
+3. Install linux-mcp-server Python library (from source)
+4. Apply fakeredis compatibility fix (see FAKEREDIS_FIX.md)
+5. Create certificate directory structure
+6. Download Satellite CA certificate
+7. Deploy and start MCP server container
+
+## Known Issues & Fixes
+
+### FakeRedis Compatibility Issue
+
+The `linux-mcp-server` package has a dependency conflict with newer versions of `fakeredis`. This role automatically applies a compatibility fix. For details, see [FAKEREDIS_FIX.md](FAKEREDIS_FIX.md).
+
+**Quick Test After Installation:**
+```bash
+ssh mcp
+timeout 3 linux-mcp-server  # Should start without ImportError
+goose session              # Should connect to all MCP extensions
+```
 
 ## Ports
 
