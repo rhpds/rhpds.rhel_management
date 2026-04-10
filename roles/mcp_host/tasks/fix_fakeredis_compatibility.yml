@@ -114,7 +114,7 @@
     state: absent
   check_mode: true
   register: verify_patch
-  failed_when: verify_patch is changed
+  failed_when: verify_patch is not changed
   when: docket_redis_file.stat.exists
   tags:
     - mcp_fix
