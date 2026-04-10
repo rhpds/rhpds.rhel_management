@@ -162,7 +162,8 @@
     url: "{{ mcp_host_satellite_ca_cert_url }}"
     dest: /etc/pki/katello/certs/foreman_raw_ca
     mode: '0644'
-    validate_certs: "{{ mcp_host_verify_ssl }}"
+    owner: "{{ student_name }}"
+    group: "{{ student_name }}"
 
 - name: Install packages
   become: true
