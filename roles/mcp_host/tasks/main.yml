@@ -119,7 +119,9 @@
   become: true
   become_user: "{{ student_name }}"
   ansible.builtin.pip:
-    name: linux-mcp-server==1.4.1
+    name:
+      - linux-mcp-server==1.4.1
+      - fakeredis<2.35
     state: present
     extra_args: --user
 
