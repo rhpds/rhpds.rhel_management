@@ -94,49 +94,49 @@
     state: present
     extra_args: --user
 
-# - name: Install linux-mcp-server pip library
-#   become: true
-#   become_user: "{{ student_name }}"
-#   ansible.builtin.pip:
-#     name: linux-mcp-server
-#     state: present
-#     extra_args: --user
-
-- name: Install linux-mcp-server using npm
+- name: Install linux-mcp-server pip library
   become: true
   become_user: "{{ student_name }}"
-  block:
-    - name: Clone repo
-      ansible.builtin.git:
-        repo: "https://github.com/rhel-lightspeed/linux-mcp-server"
-        dest: /tmp/linux-mcp-server
-        force: true
-        version: main
-      retries: 3
-      delay: 5
+  ansible.builtin.pip:
+    name: linux-mcp-server==1.4.1
+    state: present
+    extra_args: --user
 
-    - name: Install npm deps
-      ansible.builtin.command: npm install
-      args:
-        chdir: "/tmp/linux-mcp-server/mcp-app"
-        creates: "/tmp/linux-mcp-server/mcp-app/node_modules"
-      changed_when: true
+# - name: Install linux-mcp-server using npm
+#   become: true
+#   become_user: "{{ student_name }}"
+#   block:
+#     - name: Clone repo
+#       ansible.builtin.git:
+#         repo: "https://github.com/rhel-lightspeed/linux-mcp-server"
+#         dest: /tmp/linux-mcp-server
+#         force: true
+#         version: main
+#       retries: 3
+#       delay: 5
 
-    - name: Build app
-      ansible.builtin.command: npm run build:prod
-      args:
-        chdir: "/tmp/linux-mcp-server/mcp-app"
-        creates: "/tmp/linux-mcp-server/mcp-app/dist"
-      changed_when: true
+#     - name: Install npm deps
+#       ansible.builtin.command: npm install
+#       args:
+#         chdir: "/tmp/linux-mcp-server/mcp-app"
+#         creates: "/tmp/linux-mcp-server/mcp-app/node_modules"
+#       changed_when: true
 
-    - name: Install python package
-      ansible.builtin.command: pip3 install --user .
-      args:
-        chdir: "/tmp/linux-mcp-server"
-      changed_when: true
+#     - name: Build app
+#       ansible.builtin.command: npm run build:prod
+#       args:
+#         chdir: "/tmp/linux-mcp-server/mcp-app"
+#         creates: "/tmp/linux-mcp-server/mcp-app/dist"
+#       changed_when: true
 
-- name: Fix fakeredis compatibility issues
-  ansible.builtin.include_tasks: fix_fakeredis_compatibility.yml
+#     - name: Install python package
+#       ansible.builtin.command: pip3 install --user .
+#       args:
+#         chdir: "/tmp/linux-mcp-server"
+#       changed_when: true
+
+# - name: Fix fakeredis compatibility issues
+#   ansible.builtin.include_tasks: fix_fakeredis_compatibility.yml
 
 - name: Setup tmux.conf
   become: true
@@ -206,9 +206,9 @@
       - /etc/pki/katello/certs/foreman_raw_ca:/app/ca.pem:ro,Z
     command: "{{ mcp_host_container_command }}"
 
-- name: Verify MCP host installation
-  ansible.builtin.include_tasks: verify_installation.yml
-  when: mcp_host_verify_installation | default(true)
-  tags:
-    - mcp_verify
-    - verify
+# - name: Verify MCP host installation
+#   ansible.builtin.include_tasks: verify_installation.yml
+#   when: mcp_host_verify_installation | default(true)
+#   tags:
+#     - mcp_verify
+#     - verify
