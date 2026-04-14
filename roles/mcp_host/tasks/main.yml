@@ -93,7 +93,7 @@
   become: true
   ansible.builtin.copy:
     src: system.md
-    dest: /home/{{ student_name }}/.config/goose/system.md
+    dest: /home/{{ student_name }}/.config/goose/prompts/system.md
     mode: '0644'
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
