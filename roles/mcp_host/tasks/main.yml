@@ -61,12 +61,15 @@
 - name: Create goose config dir
   become: true
   ansible.builtin.file:
-    path: /home/{{ student_name }}/.config/goose
+    path: "{{ item }}"
     state: directory
     recurse: true
     mode: '0755'
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
+  loop:
+    - /home/{{ student_name }}/.config/goose
+    - /home/{{ student_name }}/.config/goose/prompts
 
 - name: Copy goose config template
   become: true
@@ -82,6 +85,15 @@
   ansible.builtin.template:
     src: goose_secrets.j2
     dest: /home/{{ student_name }}/.config/goose/secrets.yaml
+    mode: '0644'
+    owner: "{{ student_name }}"
+    group: "{{ student_name }}"
+
+- name: Copy goose secret template
+  become: true
+  ansible.builtin.copy:
+    src: system.md
+    dest: /home/{{ student_name }}/.config/goose/system.md
     mode: '0644'
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
