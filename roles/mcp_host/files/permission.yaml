@@ -1,0 +1,26 @@
+user:
+  always_allow:
+  - rhel-mcp-server__get_journal_logs
+  - rhel-mcp-server__read_log_file 
+  - rhel-mcp-server__get_network_interfaces 
+  - rhel-mcp-server__get_network_connections 
+  - rhel-mcp-server__get_listening_ports 
+  - rhel-mcp-server__list_processes 
+  - rhel-mcp-server__get_process_info 
+  - rhel-mcp-server__validate_script 
+  - rhel-mcp-server__run_script 
+  - rhel-mcp-server__list_services 
+  - rhel-mcp-server__get_service_status 
+  - rhel-mcp-server__get_service_logs 
+  - rhel-mcp-server__list_block_devices 
+  - rhel-mcp-server__list_directories 
+  - rhel-mcp-server__list_files 
+  - rhel-mcp-server__read_file 
+  - rhel-mcp-server__get_system_information 
+  - rhel-mcp-server__get_cpu_information 
+  - rhel-mcp-server__get_memory_information 
+  - rhel-mcp-server__get_disk_usage 
+  - rhel-mcp-server__get_hardware_information 
+  ask_before:
+  - rhel-mcp-server__run_script_with_confirmation
+  never_allow: []
