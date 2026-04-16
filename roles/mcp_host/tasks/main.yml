@@ -91,7 +91,7 @@
 
 - name: Copy goose permission
   become: true
-  ansible.builtin.file:
+  ansible.builtin.copy:
     src: permission.yaml
     dest: /home/{{ student_name }}/.config/goose/permission.yaml
     mode: '0644'
