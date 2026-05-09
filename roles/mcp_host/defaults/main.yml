@@ -39,7 +39,8 @@ mcp_host_litellm_api_base_url: ''
 mcp_host_litellm_available_models_list: ''
 mcp_host_litellm_virtual_key: ''
 
-# Lightspeed Keys
+# Lightspeed MCP
+mcp_host_lightspeed_mcp_image_tag: '20260402-134545-34a5d5a6'
 mcp_host_lightspeed_client_secret: ''
 mcp_host_lightspeed_client_id: ''
 
