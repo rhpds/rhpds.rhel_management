@@ -22,18 +22,28 @@
     --assumeyes
   register: satellite_change_hostname
   failed_when: '"Success!" not in satellite_change_hostname.stdout'
+  until: satellite_change_hostname is successful
+  retries: 10
+  delay: 5
 
 - name: Refresh the manifest
   ansible.builtin.command: >-
     hammer subscription
     refresh-manifest
     --organization="{{ satellite_reconfigure_org }}"
+  register: r_refresh_manifest
+  until: r_refresh_manifest is successful
+  retries: 10
+  delay: 5
 
 - name: Check if admin access token already exists
   ansible.builtin.command: >-
     hammer user access-token list
     --user=admin
   register: existing_tokens
+  until: existing_tokens is successful
+  retries: 10
+  delay: 5
 
 - name: Create satellite admin token
   ansible.builtin.command: >-
@@ -42,6 +52,9 @@
     --name="{{ satellite_reconfigure_admin_access_token_name }}"
   register: r_satellite_reconfigure_access_token
   when: satellite_reconfigure_admin_access_token_name not in existing_tokens.stdout
+  until: r_satellite_reconfigure_access_token is successful
+  retries: 10
+  delay: 5
 
 - name: Extract admin access token from output
   ansible.builtin.set_fact:
