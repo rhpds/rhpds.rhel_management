@@ -10,7 +10,7 @@ This role installs and configures the goose CLI tool, sets up Podman authenticat
 
 - RHEL 8 or 9
 - Podman installed
-- Python pip installed
+- Python 3.11 or newer with pip installed
 - Valid Red Hat registry credentials
 - Network access to registry.redhat.io and GitHub
 
@@ -63,7 +63,7 @@ mcp_host_verify_ssl: false  # SSL verification for lab environments
 1. Verify SSH connectivity to target hosts
 2. Download and install goose CLI tool
 3. Authenticate Podman to registry.redhat.io
-4. Install linux-mcp-server Python library (from source using npm build)
+4. Install `linux-mcp-server==1.8.0` with `fastmcp==3.2.4`
 5. **Apply fakeredis compatibility fix** (see FAKEREDIS_FIX.md)
 6. Configure tmux for better terminal experience
 7. Create certificate directory structure

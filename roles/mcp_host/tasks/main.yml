@@ -76,9 +76,11 @@
   ansible.builtin.template:
     src: goose_config.j2
     dest: /home/{{ student_name }}/.config/goose/config.yaml
-    mode: '0644'
+    mode: '0600'
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
+  diff: false
+  no_log: true
 
 - name: Copy goose secret template
   become: true
@@ -107,19 +109,13 @@
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
 
-- name: Install fastmcp==2.14.5 pip library
+- name: Install RHEL MCP server with the compatible FastMCP version
   become: true
   become_user: "{{ student_name }}"
   ansible.builtin.pip:
-    name: fastmcp==2.14.5
-    state: present
-    extra_args: --user
-
-- name: Install linux-mcp-server pip library
-  become: true
-  become_user: "{{ student_name }}"
-  ansible.builtin.pip:
-    name: linux-mcp-server==1.4.1
+    name:
+      - linux-mcp-server==1.8.0
+      - fastmcp==3.2.4
     state: present
     extra_args: --user
 
