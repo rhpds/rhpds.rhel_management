@@ -24,17 +24,22 @@
 - name: Update CA trust after installing katello CA
   ansible.builtin.command: update-ca-trust
 
-- name: Register Nodes to Satellite
-  ansible.builtin.shell: >-
-    subscription-manager register
-    --org="{{ satellite_host_org }}"
-    --activationkey="{{ satellite_host_activation_key }}"
-    {{ '--insecure' if not (satellite_host_verify_ssl | bool) else '' }}
-  register: registration_result
-  changed_when: "'system has been registered' in registration_result.stdout"
-  failed_when:
-    - registration_result.rc not in [0, 70]
-    - "'system has been registered' not in registration_result.stdout"
+- name: Register nodes to Satellite
+  ansible.builtin.command:
+    argv: >-
+      {{
+        [
+          'subscription-manager',
+          'register',
+          '--org=' ~ satellite_host_org,
+          '--activationkey=' ~ satellite_host_activation_key
+        ] + (['--insecure'] if not (satellite_host_verify_ssl | bool) else [])
+      }}
+
+- name: Verify the node is registered
+  ansible.builtin.command:
+    argv: [subscription-manager, identity]
+  changed_when: false
 
 - name: Initialize PostgreSQL database
   block:

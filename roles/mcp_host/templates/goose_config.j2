@@ -31,9 +31,10 @@ extensions:
     envs:
       LINUX_MCP_ALLOWED_LOG_PATHS: /var/log/messages,/var/log/lastlog
       LINUX_MCP_TOOLSET: both
-      LINUX_MCP_GATEKEEPER_MODEL: openai/{{ mcp_host_litellm_available_models_list }}
-      OPENAI_API_BASE: {{ mcp_host_litellm_api_endpoint }}
-      OPENAI_API_KEY: {{ mcp_host_litellm_virtual_key }}
+      LINUX_MCP_GATEKEEPER__PROVIDER: openai
+      LINUX_MCP_GATEKEEPER__MODEL: {{ mcp_host_litellm_available_models_list | to_json }}
+      LINUX_MCP_GATEKEEPER__OPENAI__BASE_URL: {{ mcp_host_litellm_api_base_url | to_json }}
+      OPENAI_API_KEY: {{ mcp_host_litellm_virtual_key | to_json }}
     env_keys: []
     timeout: 30
     bundled: null

@@ -76,9 +76,11 @@
   ansible.builtin.template:
     src: goose_config.j2
     dest: /home/{{ student_name }}/.config/goose/config.yaml
-    mode: '0644'
+    mode: '0600'
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
+  diff: false
+  no_log: true
 
 - name: Copy goose secret template
   become: true
@@ -107,19 +109,13 @@
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
 
-- name: Install fastmcp==2.14.5 pip library
+- name: Install RHEL MCP server with the compatible FastMCP version
   become: true
   become_user: "{{ student_name }}"
   ansible.builtin.pip:
-    name: fastmcp==2.14.5
-    state: present
-    extra_args: --user
-
-- name: Install linux-mcp-server pip library
-  become: true
-  become_user: "{{ student_name }}"
-  ansible.builtin.pip:
-    name: linux-mcp-server==1.4.1
+    name:
+      - linux-mcp-server==1.8.0
+      - fastmcp==3.2.4
     state: present
     extra_args: --user
 
@@ -150,12 +146,6 @@
     owner: "{{ student_name }}"
     group: "{{ student_name }}"
 
-- name: Install packages
-  become: true
-  ansible.builtin.dnf:
-    name: systemd-container
-    state: present
-
 - name: Allow users to open ports 80 and up without sudo etc
   ansible.posix.sysctl:
     name: net.ipv4.ip_unprivileged_port_start
@@ -163,17 +153,32 @@
     state: present
     reload: true
 
-- name: "Enable linger for the showroom_user"
-  ansible.builtin.command: "loginctl enable-linger {{ student_name }}"
-  become: true
-  changed_when: true
+- name: Get the lab user's UID
+  ansible.builtin.command:
+    argv: [id, -u, "{{ student_name }}"]
+  register: mcp_host_student_uid
+  changed_when: false
+  check_mode: false
 
-- name: Enable and start podman.socket for user via machinectl
-  ansible.builtin.command: "machinectl shell {{ student_name }}@.host /bin/systemctl --user enable --now podman.socket"
+- name: Enable linger for the lab user
   become: true
-  register: podman_socket_result
-  changed_when: "'enabled' in podman_socket_result.stdout or 'started' in podman_socket_result.stdout or podman_socket_result.rc == 0"
-  retries: 3
+  ansible.builtin.command:
+    argv: [loginctl, enable-linger, "{{ student_name }}"]
+    creates: "/var/lib/systemd/linger/{{ student_name }}"
+
+- name: Enable and start the lab user's rootless Podman socket
+  become: true
+  become_user: "{{ student_name }}"
+  ansible.builtin.systemd_service:
+    name: podman.socket
+    scope: user
+    enabled: true
+    state: started
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ mcp_host_student_uid.stdout }}"
+  register: mcp_host_podman_socket_result
+  until: mcp_host_podman_socket_result is succeeded
+  retries: 10
   delay: 2
 
 # Container must run as student_name for rootless podman
